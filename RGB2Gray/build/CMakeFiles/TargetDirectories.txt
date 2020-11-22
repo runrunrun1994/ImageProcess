@@ -1,0 +1,3 @@
+/home/dell/workspace/CODE/CUDA/ImageProcess/RGB2Gray/build/CMakeFiles/rebuild_cache.dir
+/home/dell/workspace/CODE/CUDA/ImageProcess/RGB2Gray/build/CMakeFiles/rgb2gray.dir
+/home/dell/workspace/CODE/CUDA/ImageProcess/RGB2Gray/build/CMakeFiles/edit_cache.dir
