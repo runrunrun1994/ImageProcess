@@ -34,7 +34,6 @@ void gaussfilter_cpu(cv::Mat& src, cv::Mat& dst, const int radius, double sigma)
     
     const int H = src.rows;
     const int W = src.cols;
-    const int offset = src.step - 3 * W;
     const int stride = 2*radius + 1;
 
     double* pSigMask = new double[stride*stride];
@@ -112,7 +111,6 @@ void gaussfilterV2_cpu(cv::Mat& src, cv::Mat& dst, const int radius, double sigm
     
     const int H = src.rows;
     const int W = src.cols;
-    const int offset = src.step - 3 * W;
     const int stride = 2*radius + 1;
 
     int* pSigMask = new int[stride*stride];
@@ -152,6 +150,104 @@ void gaussfilterV2_cpu(cv::Mat& src, cv::Mat& dst, const int radius, double sigm
                     sumR += pSrc[pos+2] * pSigMask[krow * stride + kcol];
                     //std::cout << pSigMask[krow * stride + kcol] << " ";
                 }
+            }
+        
+            pDst[0] = (int)(sumB / (float)sum);
+            pDst[1] = (int)(sumG / (float)sum);
+            pDst[2] = (int)(sumR / (float)sum);
+            pDst += 3;
+        }
+    }
+}
+
+void gaussmaskV3_cpu(const int r, double sigma, int* gaussMask, int& sum)
+{
+    if (r <= 0)
+        return ;
+    if (gaussMask == nullptr)
+        return ;
+
+    std::cout << "Here!" << std::endl;
+
+    sum = 0;
+
+    const int stride = 2 * r + 1;
+    for (int i = -r; i <=r; ++i)
+    {
+        gaussMask[i+r] = (int)(exp((-(i*i))/(2.0*sigma*sigma))*128+0.5);
+        sum += gaussMask[i+r];
+    }
+}
+
+void gaussfilterV3_cpu(cv::Mat& src, cv::Mat& dst, const int radius, double sigma)
+{
+    if (src.empty() || radius <= 0)
+        return ;
+    
+    const int H = src.rows;
+    const int W = src.cols;
+    const int stride = 2 * radius + 1;
+
+    int* pSigMask = new int[stride];
+    int sum = 0;
+    gaussmaskV3_cpu(radius, sigma, pSigMask, sum);
+
+    uchar* pSrc = src.data;
+    double sumB = 0.0;
+    double sumG = 0.0;
+    double sumR = 0.0;
+    int nX = 0;
+    int nY = 0;
+    int pos = 0;
+
+    for (int row = 0; row < H; ++row)
+    {
+        uchar* pDst = dst.data + row * dst.step;
+        for (int col = 0; col < W; ++col)
+        {
+            sumB = 0.0;
+            sumG = 0.0;
+            sumR = 0.0;
+            for (int j = -radius; j <= radius; ++j)
+            {
+                nX = col + j;
+                if (nX < 0 || nX > W)
+                    nX = col;
+                pos = row * src.step + nX * 3;
+
+                sumB += pSrc[pos] * pSigMask[j+radius];
+                sumG += pSrc[pos+1] * pSigMask[j+radius];
+                sumR += pSrc[pos+2] * pSigMask[j+radius];
+                //std::cout << pSigMask[krow * stride + kcol] << " ";
+            }
+        
+            pDst[0] = (int)(sumB / (float)sum);
+            pDst[1] = (int)(sumG / (float)sum);
+            pDst[2] = (int)(sumR / (float)sum);
+            pDst += 3;
+        }
+    }
+
+    uchar* pSrcDst = dst.data;
+    for (int row = 0; row < H; ++row)
+    {
+        uchar* pDst = dst.data + row * dst.step;
+        for (int col = 0; col < W; ++col)
+        {
+            sumB = 0.0;
+            sumG = 0.0;
+            sumR = 0.0;
+            for (int j = -radius; j <= radius; ++j)
+            {
+                nY = row + j;
+                if (nY < 0 || nY > H)
+                    nY = row;
+                pos = nY * dst.step + col * 3;
+
+                sumB += pSrcDst[pos] * pSigMask[j+radius];
+                sumG += pSrcDst[pos+1] * pSigMask[j+radius];
+                sumR += pSrcDst[pos+2] * pSigMask[j+radius];
+                //std::cout << pSigMask[krow * stride + kcol] << " ";
             }
         
             pDst[0] = (int)(sumB / (float)sum);

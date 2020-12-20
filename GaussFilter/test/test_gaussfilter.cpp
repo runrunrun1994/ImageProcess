@@ -53,7 +53,16 @@ int main(int argc, char* argv[])
 
     std::cout <<"opencv: " << (end -start) << std::endl;
 
-    cv::imwrite("./gaussfilter_cpu.jpg", dst);
+    gettimeofday(&tp, NULL);
+    start = tp.tv_sec*1000 + tp.tv_usec/1000;
+    gaussfilterV3_cpu(image, dst, 4, 1.2);
+
+    gettimeofday(&tp1, NULL);
+    end = tp1.tv_sec * 1000 + tp1.tv_usec/1000;
+
+    std::cout <<"gaussfilterV3: " << (end -start) << std::endl;
+
+    cv::imwrite("./gaussfilterV3_cpu.jpg", dst);
     cv::waitKey(0);
 
     return 0;

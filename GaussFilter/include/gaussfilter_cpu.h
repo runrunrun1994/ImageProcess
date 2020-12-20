@@ -36,6 +36,12 @@ void gaussmaskV2_cpu(const int r, double sigma, int* gaussMask, int& sum);
 /// \param sigma 标准差
 void gaussfilterV2_cpu(cv::Mat& src, cv::Mat& dst, const int radius, double sigma);
 
+/// \brief 生成整数形式的高斯核权重,1D
+/// \param r 高斯核半径
+/// \param gaussMask 用来保存高斯核权重的数组
+/// \param sum 高斯核权重的和
+void gaussmaskV3_cpu(const int r, double sigma, int* gaussMask, int& sum);
+
 /// \brief 使用整数形式计算，最后进行归一化,采用行列分拆
 /// \param src 原始图像
 /// \param dst 进过高斯滤波的结果图
